@@ -7,6 +7,7 @@ import datetime
 from functools import wraps
 from flask_swagger_ui import get_swaggerui_blueprint
 from werkzeug.utils import redirect
+from connect_db import search
 
 app = Flask(__name__)
 
@@ -32,10 +33,22 @@ def token_required(f):
 # def unprotected():
 #     return jsonify({'message': 'Anyone can view this'})
 
-@app.route('/unprotected/<id>',methods=['GET'])
-def unprotected2(id):
-    print(id)
-    return jsonify(id)
+# @app.route('/hotel/<title>',methods=['GET'])
+# @app.route('/hotel/<title>/<bedroom>', methods=['GET'])
+# @app.route('/hotel/<title>/<bedroom>/<bathroom>', methods=['GET'])
+# @app.route('/hotel/<title>/<bedroom>/<bathroom>/<sleep>', methods=['GET'])
+# @app.route('/hotel/<title>/<bedroom>/<bathroom>/<sleep>/<price>', methods=['GET'])
+
+@app.route('/hotel', methods=['GET'])
+def hotel():
+    title = request.args.get('title')
+    bedroom = request.args.get('bedroom')
+    bathroom = request.args.get('bathroom')
+    sleep = request.args.get('sleep')
+    price = request.args.get('price')
+    location = request.args.get('location')
+    data=search(title, bedroom, bathroom, sleep, price, location)
+    return data
 
 @app.route('/protected')
 @token_required
@@ -70,6 +83,23 @@ def login():
         return jsonify({'token':token})
     return make_response('could not varify!', 401, {'WWW-Authenticate': 'Basic realm=Login Required'})
 
+
+if __name__ == '__main__':
+    app.run(debug=False)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ### swagger specific ###
 # SWAGGER_URL = '/swagger'
 # API_URL = '/static/swagger.json'
@@ -82,7 +112,3 @@ def login():
 # )
 # app.register_blueprint(SWAGGERUI_BLUEPRINT, url_prefix=SWAGGER_URL)
 ### end swagger specific ###
-
-
-if __name__ == '__main__':
-    app.run(debug=True)
